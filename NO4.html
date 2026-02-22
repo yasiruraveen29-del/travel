@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple JS Car Game</title>
+    <style>
+        body { margin: 0; background: #222; font-family: sans-serif; overflow: hidden; }
+        #gameArea { width: 400px; height: 100vh; background: #444; margin: 0 auto; position: relative; border-left: 5px dashed #fff; border-right: 5px dashed #fff; overflow: hidden; }
+        #car { width: 50px; height: 80px; background: #f00; position: absolute; bottom: 20px; left: 175px; border-radius: 5px; }
+        .enemy { width: 50px; height: 80px; background: #00f; position: absolute; border-radius: 5px; }
+        #score { position: absolute; top: 10px; left: 10px; color: white; font-size: 20px; z-index: 10; }
+    </style>
+</head>
+<body>
+
+    <div id="score">Score: 0</div>
+    <div id="gameArea">
+        <div id="car"></div>
+    </div>
+
+    <script>
+        const car = document.getElementById('car');
+        const gameArea = document.getElementById('gameArea');
+        const scoreElement = document.getElementById('score');
+        
+        let carPos = { x: 175, y: 500 };
+        let score = 0;
+        let gameActive = true;
+
+        // Move car with Arrow Keys
+        window.addEventListener('keydown', (e) => {
+            if (!gameActive) return;
+            if (e.key === 'ArrowLeft' && carPos.x > 0) carPos.x -= 15;
+            if (e.key === 'ArrowRight' && carPos.x < 350) carPos.x += 15;
+            car.style.left = carPos.x + 'px';
+        });
+
+        function createEnemy() {
+            if (!gameActive) return;
+            const enemy = document.createElement('div');
+            enemy.classList.add('enemy');
+            enemy.style.left = Math.floor(Math.random() * 350) + 'px';
+            enemy.style.top = '-100px';
+            gameArea.appendChild(enemy);
+
+            let enemyPos = -100;
+            let interval = setInterval(() => {
+                if (!gameActive) { clearInterval(interval); return; }
+                
+                enemyPos += 5;
+                enemy.style.top = enemyPos + 'px';
+
+                // Collision Detection
+                if (enemyPos > window.innerHeight - 100 && 
+                    parseInt(enemy.style.left) < carPos.x + 50 && 
+                    parseInt(enemy.style.left) + 50 > carPos.x) {
+                    gameActive = false;
+                    alert("Game Over! Final Score: " + score);
+                    location.reload();
+                }
+
+                // Remove enemy when off screen
+                if (enemyPos > window.innerHeight) {
+                    enemy.remove();
+                    score++;
+                    scoreElement.innerText = "Score: " + score;
+                    clearInterval(interval);
+                }
+            }, 20);
+        }
+
+        setInterval(createEnemy, 1500);
+    </script>
+</body>
+</html>
